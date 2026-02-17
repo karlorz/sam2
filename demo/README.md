@@ -38,6 +38,8 @@ To install Anaconda, follow these steps:
 
 ## Quick Start
 
+### Option 1: Docker (CPU only)
+
 To get both the frontend and backend running quickly using Docker, you can use the following command:
 
 ```bash
@@ -45,14 +47,102 @@ docker compose up --build
 ```
 
 > [!WARNING]
-> On macOS, Docker containers only support running on CPU. MPS is not supported through Docker. If you want to run the demo backend service on MPS, you will need to run it locally (see "Running the Backend Locally" below).
+> On macOS, Docker containers only support running on CPU. MPS is not supported through Docker. If you want to run the demo backend service on MPS, you will need to run it locally (see options below).
 
-This will build and start both services. You can access them at:
+### Option 2: Makefile for M4 Mac (MPS Support - Recommended for Apple Silicon)
+
+For M4 Mac users who want to leverage MPS for better performance, we provide a simplified Makefile with two options:
+
+#### Option 2a: UV Setup (Fastest - Recommended ⚡)
+
+UV is 10-100x faster than pip/conda and doesn't require conda installation:
+
+```bash
+cd demo
+make setup-uv       # One-time setup with UV (fast!)
+make backend-mps-uv # Run backend with MPS
+# In a new terminal:
+make frontend       # Run frontend
+```
+
+**Why UV?**
+- ⚡ 10-100x faster package installation
+- 🚀 No conda required (uses standard Python venv)
+- 💾 Better caching and dependency resolution
+- ✅ Already installed on your system!
+
+See [`UV_QUICK_START.md`](UV_QUICK_START.md) for detailed UV instructions.
+
+#### Option 2b: Conda Setup (Traditional)
+
+```bash
+cd demo
+make setup          # One-time setup with conda
+conda activate sam2-demo
+make backend-mps    # Run backend with MPS
+# In a new terminal:
+make frontend       # Run frontend
+```
+
+See the "Running Backend with MPS Support (Simplified with Makefile)" section below for more details.
+
+## Accessing the Services
+
+Once running (via Docker or locally), you can access the services at:
 
 - **Frontend:** [http://localhost:7262](http://localhost:7262)
 - **Backend:** [http://localhost:7263/graphql](http://localhost:7263/graphql)
 
-## Running Backend with MPS Support
+## Running Backend with MPS Support (Simplified with Makefile)
+
+For M4 Mac users, we provide a Makefile that simplifies running the backend with MPS support.
+
+### Quick Start with Makefile
+
+1. **[Optional] Run validation test** to ensure everything is set up correctly:
+   ```bash
+   cd demo
+   ./test_makefile.sh
+   ```
+
+2. **One-time setup** (creates conda env, installs dependencies, downloads checkpoints):
+   ```bash
+   make setup
+   ```
+
+3. **Activate the conda environment:**
+   ```bash
+   conda activate sam2-demo
+   ```
+
+4. **Run the backend with MPS support:**
+   ```bash
+   make backend-mps
+   ```
+
+5. **In a new terminal, run the frontend:**
+   ```bash
+   cd demo
+   make frontend
+   ```
+
+### Available Makefile Commands
+
+Run `make help` to see all available commands. Common ones include:
+
+- `make backend-mps` - Run backend with MPS support (default: base_plus model)
+- `make backend-mps-tiny` - Run backend with tiny model
+- `make backend-mps-small` - Run backend with small model
+- `make backend-mps-large` - Run backend with large model
+- `make backend-cpu` - Run backend with CPU fallback (if MPS crashes)
+- `make frontend` - Run frontend development server
+
+You can also customize the model size:
+```bash
+make backend-mps MODEL_SIZE=large
+```
+
+## Running Backend with MPS Support (Manual Setup)
 
 MPS (Metal Performance Shaders) is not supported with Docker. To use MPS, you need to run the backend on your local machine.
 
